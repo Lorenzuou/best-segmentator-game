@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking - Jogo de Segmentação de Pele</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<%= styleSheet %>">
+</head>
+<body class="rank-body">
+    <div class="arcade-cabinet">
+        <div class="screen">
+            <div class="screen-content">
+                <h1 class="arcade-title">JOGO DE SEGMENTAÇÃO DE PELE</h1>
+                <h2 class="arcade-subtitle">★ RANKING DOS CAMPEÕES ★</h2>
+                
+                <div class="rank-table">
+                    <div class="rank-header">
+                        <div class="rank-position">RANK</div>
+                        <div class="rank-name">JOGADOR</div>
+                        <div class="rank-time">TEMPO</div>
+                        <div class="rank-metrics">SCORE</div>
+                    </div>
+                    
+                    <% if (rankings && rankings.length > 0) { %>
+                        <% rankings.forEach((entry, index) => { %>
+                            <div class="rank-row <%= index < 3 ? [`first-place`, `second-place`, `third-place`][index] : '' %>">
+                                <div class="rank-position"><%= (index + 1).toString().padStart(2, '0') %></div>
+                                <div class="rank-name"><%= entry.name.toUpperCase() %></div>
+                                <div class="rank-time"><%= entry.getFormattedTime() %></div>
+                                <div class="rank-metrics">
+                                    <div class="metrics-tooltip">
+                                        <%= entry.accuracy.toFixed(1) %>%
+                                        <span class="tooltiptext">
+                                            ▶ Dice: <%= entry.dice.toFixed(3) %><br>
+                                            ▶ Jaccard: <%= entry.jaccard.toFixed(3) %>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="rank-empty">
+                            ✧ SEJA O PRIMEIRO A ENTRAR NO RANKING! ✧
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="legend">
+                    <p>⭐ CRITÉRIOS DE CLASSIFICAÇÃO ⭐</p>
+                    <ol>
+                        <li>Maior precisão de segmentação</li>
+                        <li>Menor tempo de conclusão</li>
+                        <li>Maior coeficiente Dice</li>
+                        <li>Maior índice Jaccard</li>
+                    </ol>
+                </div>
+
+                <a href="/" class="arcade-button">◄ Voltar ao Jogo ►</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

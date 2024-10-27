@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="<%= styleSheet %>">
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div display="flex" justify-content="center" align-items="center">
+        <h1>Image Segmentation Tool</h1>
+        <h2>Select what you want to do:</h2>
+
+        <div class="row">
+            <div class="col">
+                <label for="personName">Your Name (required):</label>
+                <input type="text" id="personName" name="personName" required placeholder="Enter your name" style="margin: 10px; padding: 10px;">
+            </div>
+        </div>
+  
+        <div class="row">
+            <div class="col">
+                <button class="button" id="manualSegmentationButton">Manual Segmentation</button>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <button class="button" id="samSegmentationButton">SAM Segmentation</button>
+            </div>
+        </div>
+
+        <!-- <div class="row">
+             <div class="col">
+            <button id="preProcessFolderButton" class="button">Folder Pre-Processing</button>
+            <input type="text" id="folderName" name="folderName" list="folderList" placeholder="Enter the folder name" style="margin: 10px; padding: 10px;"/> 
+            <datalist id="folderList"></datalist> 
+            <div id="loader" class="loader" style="display: none;"></div>
+            </div>
+        </div> -->
+        </div>
+        <script>
+        //check if name_of_person is in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const name_of_person = urlParams.get('name_of_person');
+        if (name_of_person) {
+            document.getElementById('personName').value = name_of_person;
+        }
+
+          document.addEventListener('DOMContentLoaded', function() {
+                const inputField = document.getElementById('folderName');
+                
+                inputField.addEventListener('click', async function() {
+                    // Check if the list is already populated to avoid refetching
+                    if(document.getElementById('folderList').options.length === 0) {
+                        try {
+                            const response = await fetch('http://127.0.0.1:5000/data/list');
+                            const data = await response.json();
+                            const folderList = document.getElementById('folderList');
+
+                            const folders = data.folders;
+
+                            folders.forEach(function(folder) {
+                                console.log(folder);
+                                const option = document.createElement('option');
+
+                                option.value = folder;
+
+                                folderList.appendChild(option);
+                            });
+
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert('Error: ' + error);
+                        }
+                    }
+                });
+           });
+
+           document.addEventListener('DOMContentLoaded', function() {
+                const manualButton = document.getElementById('manualSegmentationButton');
+                const samButton = document.getElementById('samSegmentationButton');
+                const personNameInput = document.getElementById('personName');
+
+                function formatNameAndNavigate(baseUrl) {
+                    let personName = personNameInput.value.trim().replace(/\s+/g, '_');
+                    if (personName) { // Ensure the name is not empty
+                        window.location.href = `${baseUrl}?name_of_person=${personName}`;
+                    } else {
+                        alert('Please enter your name');
+                    }
+                }
+
+                manualButton.addEventListener('click', function() {
+                    formatNameAndNavigate('/manual');
+                });
+
+                samButton.addEventListener('click', function() {
+                    formatNameAndNavigate('/sam');
+                });
+            }); 
+
+
+           document.querySelector('#preProcessFolderButton').addEventListener('click', async function() {
+                var folderName = document.getElementById('folderName').value;
+                console.log("folderName: " + folderName);
+
+                // Show the loader
+                document.getElementById('loader').style.display = 'block';
+
+                try {
+                    const response = await fetch('<%= apiUrl %>/process/folder?folderName=' + folderName);
+                    const data = await response.json();
+                    // Hide the loader after the fetch is complete
+                    document.getElementById('loader').style.display = 'none';
+                } catch (error) {
+                    console.error('Error:', error);
+                    // Hide the loader if there is an error
+                    document.getElementById('loader').style.display = 'none';
+
+                    alert('Error: ' + error);
+                }
+            });
+    </script>
+</body>
+</html>
