@@ -2,6 +2,9 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs').promises; // For file operations
 const app = express();
+//import cors
+const cors = require('cors');
+app.use(cors());
 
 // Set the view engine to EJS
 app.set('view engine', 'ejs');
@@ -48,7 +51,6 @@ class RankingManager {
                 new RankingEntry(
                     entry.name, 
                     entry.time, 
-                    entry.accuracy, 
                     entry.dice,
                     entry.jaccard,
                     entry.timestamp
@@ -99,6 +101,8 @@ class RankingManager {
 
 // Initialize ranking manager
 const rankingManager = new RankingManager(path.join(__dirname, 'data', 'rankings.json'));
+console.log("path")
+console.log(path.join(__dirname, 'data', 'rankings.json'))
 
 // Helper function to render views with consistent variables
 const renderWithVars = async (req, res, view) => {
@@ -119,35 +123,35 @@ app.get('/ranking', async (req, res) => {
     });
 });
 
-// API endpoint to submit new scores
-app.post('/api/submit-score', async (req, res) => {
-    try {
-        const { name, time, accuracy, dice, jaccard } = req.body;
+// // API endpoint to submit new scores
+// app.post('/api/submit-score', async (req, res) => {
+//     try {
+//         const { name, time, accuracy, dice, jaccard } = req.body;
         
-        // Validate input
-        if (!name || !time || !accuracy || !dice || !jaccard) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
+//         // Validate input
+//         if (!name || !time || !accuracy || !dice || !jaccard) {
+//             return res.status(400).json({ error: 'Missing required fields' });
+//         }
 
-        // Create new ranking entry
-        const entry = new RankingEntry(
-            name,
-            parseFloat(time),
-            parseFloat(accuracy),
-            parseFloat(dice),
-            parseFloat(jaccard),
-            Date.now()
-        );
+//         // Create new ranking entry
+//         const entry = new RankingEntry(
+//             name,
+//             parseFloat(time),
+//             parseFloat(accuracy),
+//             parseFloat(dice),
+//             parseFloat(jaccard),
+//             Date.now()
+//         );
 
-        await rankingManager.loadRankings();
-        await rankingManager.addEntry(entry);
+//         await rankingManager.loadRankings();
+//         await rankingManager.addEntry(entry);
 
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Error submitting score:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+//         res.json({ success: true });
+//     } catch (error) {
+//         console.error('Error submitting score:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// });
 
 // Existing routes
 app.get('/', (req, res) => renderWithVars(req, res, 'index'));

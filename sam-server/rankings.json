@@ -1,0 +1,44 @@
+[
+    {
+        "dice": 0.0,
+        "iou": 0.0,
+        "name": "group_2",
+        "position": 1,
+        "time": 4546.0
+    },
+    {
+        "dice": 0.0,
+        "iou": 0.0,
+        "name": "group_4",
+        "position": 2,
+        "time": 5679.0
+    },
+    {
+        "dice": 0.0,
+        "iou": 0.0,
+        "name": "group_2",
+        "position": 3,
+        "time": 5784.0
+    },
+    {
+        "dice": 0.48248978058165143,
+        "iou": 0.33391673631947427,
+        "name": "group_3",
+        "position": 4,
+        "time": 8217.0
+    },
+    {
+        "dice": 0.0,
+        "iou": 0.0,
+        "name": "group_4",
+        "position": 5,
+        "time": 1730251457709.0
+    },
+    {
+        "dice": 0.0,
+        "iou": 0.0,
+        "name": "group_4",
+        "position": 6,
+        "time": 1730251508287.0
+    }
+]

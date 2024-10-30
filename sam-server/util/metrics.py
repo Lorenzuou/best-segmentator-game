@@ -7,9 +7,28 @@ import os
 def get_same_images_from_folder(folder_path1, folder_path2):
     same_images = []
     for img_path in os.listdir(folder_path1):
-        if img_path in os.listdir(folder_path2):
-            same_images.append(cv2.imread(img_path))
+        same_images.append(cv2.imread(os.path.join(folder_path2, img_path[:-4] + '_segmentation.png')))
     return same_images
+
+
+def equalize_images_size(images_list1, images_list2):
+    equalized_images_list1 = []
+    equalized_images_list2 = []
+    for img1, img2 in zip(images_list1, images_list2):
+        img1 = cv2.resize(img1, (img2.shape[1], img2.shape[0]))
+        equalized_images_list1.append(img1)
+        equalized_images_list2.append(img2)
+    return equalized_images_list1, equalized_images_list2
+
+
+def get_images_from_folder(folder_path):
+    images = []
+    with open('metrics.txt', 'a') as f:
+        f.write(f'folder_path: {folder_path}\n')
+    for img_path in os.listdir(folder_path):
+        images.append(cv2.imread(os.path.join(folder_path, img_path)))
+    return images
+
 # Metrics
 def pixel_accuracy(pred, target):
     correct = (pred == target).sum()
@@ -31,7 +50,9 @@ def dice_coefficient(pred, target):
 def calculate_metrics(pred_list, target_list, metrics):
     total_metrics = {metric: 0 for metric in metrics}
     n = len(pred_list)  # Assuming pred_list and target_list are of the same length
-
+    with open('metrics.txt', 'a') as f:
+        f.write(f'pred_list: {pred_list}\n')
+        f.write(f'target_list: {target_list}\n')
     for pred, target in zip(pred_list, target_list):
         for metric in metrics:
             if metric == 'pixel_accuracy':
@@ -40,6 +61,8 @@ def calculate_metrics(pred_list, target_list, metrics):
                 total_metrics[metric] += intersection_over_union(pred, target)
             elif metric == 'dice_coefficient':
                 total_metrics[metric] += dice_coefficient(pred, target)
+    with open('metrics.txt', 'a') as f:
+        f.write(f'total_metrics: {total_metrics}\n')
     # Calculate the mean for each metric
     mean_metrics = {metric: total_metrics[metric] / n for metric in metrics}
 
@@ -63,7 +86,7 @@ def get_segmentation_masks_from_images_list(images_list):
 def get_segmentation_masks_from_images_folder(folder_path):
     masks = []
     for img_path in os.listdir(folder_path):
-        img = cv2.imread(img_path)
+        img = cv2.imread(os.path.join(folder_path, img_path))
         mask = get_segmentation_mask_from_image(img)
         masks.append(mask)
     return masks

@@ -17,8 +17,14 @@ import pickle as pkl
 
 SESSIONS_FOLDER = 'sessions'
 MAIN_IMAGE_FOLDER = 'images'
-RANKING_FILE = 'ranking.json'
-GT_FOLDER = './images/pad_segmention_all/all-mask'
+RANKING_FILE = 'rankings.json'
+GT_FOLDER = './images/pad_segmentation_all/all-mask'
+
+
+#create RANKING_FILE if it does not exist
+if not os.path.exists(RANKING_FILE):
+    with open(RANKING_FILE, 'w') as f:
+        json.dump([], f)
 
 
 def rmdir(directory):
@@ -147,7 +153,6 @@ def generate_images_with_box(image, box):
     color = (255, 255, 255)
     mask = np.where(mask_input, 255, 0).astype('uint8')
     image = apply_mask(image_rgb, mask, color=color)
-
 
     return image
 
@@ -490,10 +495,18 @@ def save_run():
 
     metrics_to_use = ['intersection_over_union', 'dice_coefficient']
     session_folder = os.path.join(SESSIONS_FOLDER, session_identifier,'masked')
-    session_masked = metrics.get_segmentation_masks_from_images_folder(session_folder)
+    session_images = metrics.get_images_from_folder(session_folder)
+    original_images = metrics.get_same_images_from_folder(session_folder, GT_FOLDER)
+    with open("metrics.txt", "w") as f:
+        f.write(f'original_images: {str(len(original_images))}')
+        f.write(f'session_images: {str(len(session_images))}')
+    session_images, original_images = metrics.equalize_images_size(session_images, original_images)
 
-    original_images = metrics.get_same_images_from_folder(GT_FOLDER, session_folder)
     original_masks = metrics.get_segmentation_masks_from_images_list(original_images)
+    session_masked = metrics.get_segmentation_masks_from_images_list(session_images)
+    with open("metrics.txt", "a") as f:
+        f.write(f'original_masks: {str(len(original_masks))}')
+        f.write(f'session_masked: {str(len(session_masked))}')
 
     mean_metrics = metrics.calculate_metrics(session_masked,
                                              original_masks,
@@ -518,7 +531,9 @@ def save_run():
     # Add new entry to ranking list
     ranking.append(new_entry)
 
-    ranking.sort(key=lambda x: (x['time'], -x['iou'], -x['dice']))
+    ranking.sort(key=lambda x: (x['time'],
+                                -x['iou'],
+                                -x['dice']))
 
     # Update positions for all entries
     for i, entry in enumerate(ranking):
@@ -536,6 +551,7 @@ def save_run():
         json.dump(ranking, f, indent=4)
 
     return jsonify({
+        'user': user_name,
         'message': 'Run saved successfully',
         'position': user_position,
         'total_participants': len(ranking),
