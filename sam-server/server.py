@@ -480,41 +480,46 @@ def save_timer():
     return jsonify({'message': 'Time saved successfully'}), 200
 
 
+@app.route('/data/getrankings', methods=['GET'])
+def get_rankings():
+    with open(RANKING_FILE, 'r') as f:
+        ranking_dict = json.load(f)
+    return jsonify(ranking_dict), 200
+
+
 @app.route('/data/saverun', methods=['POST'])
 def save_run():
     data = request.json
     if 'sessionIdentifier' not in data:
         return jsonify({'error': 'No sessionIdentifier in request'}), 400
-    if 'folderName' not in data:
-        return jsonify({'error': 'No folderName in request'}), 400
+    if 'user_name' not in data:
+        return jsonify({'error': 'No user_name in request'}), 400
     if 'time' not in data:
         return jsonify({'error': 'No time in request'}), 400
 
     session_identifier = data['sessionIdentifier']
-    user_name = data['folderName'].split('-')[-1]
+    user_name = data['user_name']
 
     metrics_to_use = ['intersection_over_union', 'dice_coefficient']
-    session_folder = os.path.join(SESSIONS_FOLDER, session_identifier,'masked')
+    session_folder = os.path.join(SESSIONS_FOLDER, session_identifier, 'masked')
     session_images = metrics.get_images_from_folder(session_folder)
     original_images = metrics.get_same_images_from_folder(session_folder, GT_FOLDER)
-    with open("metrics.txt", "w") as f:
-        f.write(f'original_images: {str(len(original_images))}')
-        f.write(f'session_images: {str(len(session_images))}')
+
     session_images, original_images = metrics.equalize_images_size(session_images, original_images)
 
     original_masks = metrics.get_segmentation_masks_from_images_list(original_images)
     session_masked = metrics.get_segmentation_masks_from_images_list(session_images)
-    with open("metrics.txt", "a") as f:
-        f.write(f'original_masks: {str(len(original_masks))}')
-        f.write(f'session_masked: {str(len(session_masked))}')
-
+ 
     mean_metrics = metrics.calculate_metrics(session_masked,
-                                             original_masks,
-                                             metrics_to_use)
+                                          original_masks,
+                                          metrics_to_use)
 
     # Load current ranking
     with open(RANKING_FILE, 'r') as f:
-        ranking = json.load(f)
+        ranking_dict = json.load(f)
+        if not isinstance(ranking_dict, dict):
+            # Convert old list format to new dict format if necessary
+            ranking_dict = {entry['name']: entry for entry in ranking_dict}
 
     iou = mean_metrics['intersection_over_union']
     dice = mean_metrics['dice_coefficient']
@@ -525,42 +530,41 @@ def save_run():
         "name": user_name,
         "time": time,
         "iou": iou,
-        "dice": dice,
+        "dice": dice
     }
 
-    # Add new entry to ranking list
-    ranking.append(new_entry)
+    # Update or add the entry
+    ranking_dict[user_name] = new_entry
 
-    ranking.sort(key=lambda x: (x['time'],
-                                -x['iou'],
-                                -x['dice']))
+    # Convert dict to list for sorting
+    ranking_list = list(ranking_dict.values())
+    ranking_list.sort(key=lambda x: (x['time'], -x['iou'], -x['dice']))
 
-    # Update positions for all entries
-    for i, entry in enumerate(ranking):
+    # Update positions and convert back to dict
+    ranking_dict = {}
+    for i, entry in enumerate(ranking_list):
         entry['position'] = i + 1
+        ranking_dict[entry['name']] = entry
 
     # Find position of current user's run
-    user_position = next(i for i, entry in enumerate(ranking) 
-                        if entry['name'] == user_name and 
-                           entry['time'] == time and 
-                           entry['iou'] == iou and 
-                           entry['dice'] == dice) + 1
+    user_position = ranking_dict[user_name]['position']
 
     # Save updated ranking
     with open(RANKING_FILE, 'w') as f:
-        json.dump(ranking, f, indent=4)
+        json.dump(ranking_dict, f, indent=4)
 
     return jsonify({
         'user': user_name,
         'message': 'Run saved successfully',
         'position': user_position,
-        'total_participants': len(ranking),
+        'total_participants': len(ranking_dict),
         'metrics': {
             'iou': iou,
             'dice': dice,
             'time': time
         }
     }), 200
+
 
 @app.route('/')
 def hello():

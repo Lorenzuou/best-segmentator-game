@@ -1,44 +1,16 @@
-[
-    {
-        "dice": 0.0,
-        "iou": 0.0,
-        "name": "group_2",
-        "position": 1,
-        "time": 4546.0
-    },
-    {
-        "dice": 0.0,
-        "iou": 0.0,
-        "name": "group_4",
+{
+    "Lorenzo": {
+        "dice": 0.7123018232452568,
+        "iou": 0.5547429674456094,
+        "name": "Lorenzo",
         "position": 2,
-        "time": 5679.0
+        "time": 6830.0
     },
-    {
-        "dice": 0.0,
-        "iou": 0.0,
-        "name": "group_2",
-        "position": 3,
-        "time": 5784.0
-    },
-    {
-        "dice": 0.48248978058165143,
-        "iou": 0.33391673631947427,
-        "name": "group_3",
-        "position": 4,
-        "time": 8217.0
-    },
-    {
-        "dice": 0.0,
-        "iou": 0.0,
-        "name": "group_4",
-        "position": 5,
-        "time": 1730251457709.0
-    },
-    {
-        "dice": 0.0,
-        "iou": 0.0,
-        "name": "group_4",
-        "position": 6,
-        "time": 1730251508287.0
+    "antionio": {
+        "dice": 0.0032254123396456935,
+        "iou": 0.0016231770000737808,
+        "name": "antionio",
+        "position": 1,
+        "time": 3856.0
     }
-]
+}

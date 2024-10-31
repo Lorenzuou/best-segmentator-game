@@ -14,115 +14,49 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
 
 // Get the API URL from the environment variable
-const apiUrl = process.env.API_URL || 'http://127.0.0.1:5000';
-
+const FLASK_API_URL = process.env.API_URL || 'http://127.0.0.1:5000';
+const CONTAINER_FLASK_API_URL = 'http://app-api:5000'; 
 // Add JSON parsing middleware
 app.use(express.json());
 
-// Data structure for rankings
-class RankingEntry {
-    constructor(name, time, accuracy, dice, jaccard, timestamp) {
-        this.name = name;
-        this.time = time;          // in seconds
-        this.accuracy = accuracy;   // percentage
-        this.dice = dice;          // dice coefficient
-        this.jaccard = jaccard;    // jaccard index
-        this.timestamp = timestamp; // when the score was recorded
-    }
+const RankingManager = require('./rankingManager.js');
 
-    // Format time from seconds to MM:SS
-    getFormattedTime() {
-        const minutes = Math.floor(this.time / 60);
-        const seconds = this.time % 60;
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-}
 
-class RankingManager {
-    constructor(filepath) {
-        this.filepath = filepath;
-        this.rankings = [];
-    }
 
-    async loadRankings() {
-        try {
-            const data = await fs.readFile(this.filepath, 'utf8');
-            this.rankings = JSON.parse(data).map(entry => 
-                new RankingEntry(
-                    entry.name, 
-                    entry.time, 
-                    entry.dice,
-                    entry.jaccard,
-                    entry.timestamp
-                )
-            );
-        } catch (error) {
-            console.log('No existing rankings file, starting fresh');
-            this.rankings = [];
-        }
-    }
 
-    async saveRankings() {
-        await fs.writeFile(this.filepath, JSON.stringify(this.rankings, null, 2));
-    }
-
-    // Sort rankings by multiple criteria
-    sortRankings() {
-        this.rankings.sort((a, b) => {
-            // Primary sort by accuracy
-            if (b.accuracy !== a.accuracy) {
-                return b.accuracy - a.accuracy;
-            }
-            // Secondary sort by time (faster is better)
-            if (a.time !== b.time) {
-                return a.time - b.time;
-            }
-            // Tertiary sort by dice coefficient
-            if (b.dice !== a.dice) {
-                return b.dice - a.dice;
-            }
-            // Quaternary sort by jaccard index
-            return b.jaccard - a.jaccard;
-        });
-    }
-
-    async addEntry(entry) {
-        this.rankings.push(entry);
-        this.sortRankings();
-        // Keep only top 100 scores
-        this.rankings = this.rankings.slice(0, 100);
-        await this.saveRankings();
-    }
-
-    getTopRankings(limit = 20) {
-        return this.rankings.slice(0, limit);
-    }
-}
 
 // Initialize ranking manager
-const rankingManager = new RankingManager(path.join(__dirname, 'data', 'rankings.json'));
+const rankingManager = new RankingManager(CONTAINER_FLASK_API_URL);
 console.log("path")
 console.log(path.join(__dirname, 'data', 'rankings.json'))
 
 // Helper function to render views with consistent variables
 const renderWithVars = async (req, res, view) => {
     res.render(view, { 
-        apiUrl,
+        apiUrl: FLASK_API_URL,
         styleSheet: '/css/styles.css'
     });
 };
 
-// Modified ranking route
-app.get('/ranking', async (req, res) => {
-    await rankingManager.loadRankings();
-    const rankings = rankingManager.getTopRankings();
-    res.render('rank', { 
-        apiUrl,
-        styleSheet: '/css/styles.css',
-        rankings: rankings
-    });
-});
 
+// Ranking route
+app.get('/ranking', async (req, res) => {
+    try {
+        await rankingManager.loadRankings();
+        const rankings = rankingManager.getTopRankings();
+        
+        res.render('rank', {
+            apiUrl: FLASK_API_URL,
+            styleSheet: '/css/styles.css',
+            rankings: rankings
+        });
+    } catch (error) {
+        console.error('Error rendering ranking page:', error);
+        res.status(500).render('error', {
+            message: 'Unable to load rankings at this time'
+        });
+    }
+});
 // // API endpoint to submit new scores
 // app.post('/api/submit-score', async (req, res) => {
 //     try {
