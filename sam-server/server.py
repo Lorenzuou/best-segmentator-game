@@ -17,13 +17,17 @@ import pickle as pkl
 
 SESSIONS_FOLDER = 'sessions'
 MAIN_IMAGE_FOLDER = 'images'
-RANKING_FILE = 'rankings.json'
+RANKING_FILE_SAM = 'rankings_sam.json'
+RANKING_FILE_MANUAL = 'rankings_manual.json'
 GT_FOLDER = './images/pad_segmentation_all/all-mask'
 
 
 #create RANKING_FILE if it does not exist
-if not os.path.exists(RANKING_FILE):
-    with open(RANKING_FILE, 'w') as f:
+if not os.path.exists(RANKING_FILE_SAM):
+    with open(RANKING_FILE_SAM, 'w') as f:
+        json.dump([], f)
+if not os.path.exists(RANKING_FILE_MANUAL):
+    with open(RANKING_FILE_MANUAL, 'w') as f:
         json.dump([], f)
 
 
@@ -480,11 +484,33 @@ def save_timer():
     return jsonify({'message': 'Time saved successfully'}), 200
 
 
-@app.route('/data/getrankings', methods=['GET'])
+@app.route('/data/getranking', methods=['GET'])
 def get_rankings():
-    with open(RANKING_FILE, 'r') as f:
-        ranking_dict = json.load(f)
+    type = request.args.get('type')
+    if type == 'manual':
+        with open(RANKING_FILE_MANUAL, 'r') as f:
+            ranking_dict = json.load(f)
+    elif type == 'sam':
+        with open(RANKING_FILE_SAM, 'r') as f:
+            ranking_dict = json.load(f)
+    else:
+        return jsonify({'error': 'Invalid ranking type'}), 400
     return jsonify(ranking_dict), 200
+
+
+@app.route('/data/ranking/reset/', methods=['POST'])
+def reset_ranking():
+    type = request.args.get('type')
+    if type == 'manual':
+        with open(RANKING_FILE_MANUAL, 'w') as f:
+            json.dump([], f)
+    elif type == 'sam':
+        with open(RANKING_FILE_SAM, 'w') as f:
+            json.dump([], f)
+    else:
+        return jsonify({'error': 'Invalid ranking type'}), 400
+    
+    return jsonify({'message': 'Ranking reset successfully'}), 200
 
 
 @app.route('/data/saverun', methods=['POST'])
@@ -496,8 +522,15 @@ def save_run():
         return jsonify({'error': 'No user_name in request'}), 400
     if 'time' not in data:
         return jsonify({'error': 'No time in request'}), 400
-
+    
     session_identifier = data['sessionIdentifier']
+    
+    ranking_file = None
+    if 'manual' in session_identifier: 
+        ranking_file = RANKING_FILE_MANUAL
+    else:
+        ranking_file = RANKING_FILE_SAM
+
     user_name = data['user_name']
 
     metrics_to_use = ['intersection_over_union', 'dice_coefficient']
@@ -511,11 +544,11 @@ def save_run():
     session_masked = metrics.get_segmentation_masks_from_images_list(session_images)
  
     mean_metrics = metrics.calculate_metrics(session_masked,
-                                          original_masks,
-                                          metrics_to_use)
+                                             original_masks,
+                                             metrics_to_use)
 
     # Load current ranking
-    with open(RANKING_FILE, 'r') as f:
+    with open(ranking_file, 'r') as f:
         ranking_dict = json.load(f)
         if not isinstance(ranking_dict, dict):
             # Convert old list format to new dict format if necessary
@@ -550,7 +583,7 @@ def save_run():
     user_position = ranking_dict[user_name]['position']
 
     # Save updated ranking
-    with open(RANKING_FILE, 'w') as f:
+    with open(ranking_file, 'w') as f:
         json.dump(ranking_dict, f, indent=4)
 
     return jsonify({

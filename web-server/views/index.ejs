@@ -7,27 +7,37 @@
 </head>
 <body>
     <div display="flex" justify-content="center" align-items="center">
-        <h1>Image Segmentation Tool</h1>
-        <h2>Select what you want to do:</h2>
+        <h1>Ferramenta de Segmentação de Imagens</h1>
+        <h2>Escolha qual competição participar:</h2>
 
         <div class="row">
             <div class="col">
-                <label for="personName">Your Name (required):</label>
-                <input type="text" id="personName" name="personName" required placeholder="Enter your name" style="margin: 10px; padding: 10px;">
+                <label for="personName">Seu Nome (obrigatório):</label>
+                <input type="text" id="personName" name="personName" required placeholder="Digite seu nome" style="margin: 10px; padding: 10px;">
             </div>
         </div>
   
         <div class="row">
             <div class="col">
-                <button class="button" id="manualSegmentationButton">Manual Segmentation</button>
+                <button class="button" id="manualSegmentationButton">Competição de Segmentação Manual</button>
             </div>
         </div>
         
         <div class="row">
             <div class="col">
-                <button class="button" id="samSegmentationButton">SAM Segmentation</button>
+                <button class="button" id="samSegmentationButton">Competição de Segmentação com SAM</button>
             </div>
         </div>
+        <div class="row">
+
+        <div class="col">
+            <button class="button" id="rankingButton" onclick="window.location.href='/ranking/sam'">Ranking SAM</button>
+        </div>
+
+        <div class="col">
+            <button class="button" id="rankingButton" onclick="window.location.href='/ranking/manual'">Ranking Manual</button>
+        </div>
+    </div>
 
         <!-- <div class="row">
              <div class="col">
@@ -81,12 +91,13 @@
                 const samButton = document.getElementById('samSegmentationButton');
                 const personNameInput = document.getElementById('personName');
 
+
                 function formatNameAndNavigate(baseUrl) {
                     let personName = personNameInput.value.trim().replace(/\s+/g, '_');
                     if (personName) { // Ensure the name is not empty
                         window.location.href = `${baseUrl}?name_of_person=${personName}`;
                     } else {
-                        alert('Please enter your name');
+                        alert('Por favor, digite o seu nome');
                     }
                 }
 

@@ -5,26 +5,27 @@ class RankingEntry {
         this.name = data.name;
         this.time = data.time;
         this.dice = data.dice;
-        this.jaccard = data.iou;  // IoU is the same as Jaccard index
-        this.accuracy = ((data.dice + data.iou) / 2) * 100;  // Combined score as percentage
+        this.jaccard = data.iou;  
+        this.accuracy = ((data.dice + data.iou) / 2) * 100;  
     }
 
     getFormattedTime() {
-        const minutes = Math.floor(this.time / 60);
-        const seconds = Math.floor(this.time % 60);
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        const seconds = Math.floor(this.time / 1000);
+        return `${seconds}.${(this.time % 1000).toString().padStart(2, '0')}s`;
     }
 }
 
 class RankingManager {
-    constructor(flaskApiUrl) {
+    constructor(flaskApiUrl, type) {
         this.flaskApiUrl = flaskApiUrl;
         this.rankings = [];
+        this.type=type;
+        
     }
 
     async loadRankings() {
         try {
-            const response = await axios.get(`${this.flaskApiUrl}/data/getrankings`);
+            const response = await axios.get(`${this.flaskApiUrl}/data/getranking?type=${this.type}`);
             const rankingDict = response.data;
             
             // Convert dictionary to array and create RankingEntry objects

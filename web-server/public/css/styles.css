@@ -86,6 +86,28 @@ h4 {
     font-family: 'Press Start 2P', monospace;
 }
 
+#personName {
+    margin: 10px;
+    padding: 10px;
+    border: 3px solid #0088ff;
+    border-radius: 5px;
+    font-size: 16px;
+    width: calc(50% - 24px); /* Adjust width to account for padding and border */
+    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+    background:#016fcf; /* Darker blueish background color */
+    color: #ffffff; /* White text color for better contrast */
+    
+}
+
+#personName::placeholder {
+    color: #bccce0; /* Light steel blue color for placeholder */
+}
+
+
+#personName:focus {
+    border-color: #007BFF; /* Change border color on focus */
+    outline: none; /* Remove default outline */
+}
 .button:hover {
     background: linear-gradient(45deg, #0066cc, #0088ff);
     transform: scale(1.05) translateY(-2px);

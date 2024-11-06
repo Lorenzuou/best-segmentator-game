@@ -22,11 +22,14 @@ app.use(express.json());
 const RankingManager = require('./rankingManager.js');
 
 
+const groupFolder = 'group_1';
+
 
 
 
 // Initialize ranking manager
-const rankingManager = new RankingManager(CONTAINER_FLASK_API_URL);
+const rankingManagerSAM = new RankingManager(CONTAINER_FLASK_API_URL, 'sam');
+const rankingManagerManual = new RankingManager(CONTAINER_FLASK_API_URL, 'manual');
 console.log("path")
 console.log(path.join(__dirname, 'data', 'rankings.json'))
 
@@ -34,21 +37,33 @@ console.log(path.join(__dirname, 'data', 'rankings.json'))
 const renderWithVars = async (req, res, view) => {
     res.render(view, { 
         apiUrl: FLASK_API_URL,
-        styleSheet: '/css/styles.css'
+        styleSheet: '/css/styles.css',
+        groupFolder: groupFolder
     });
 };
 
 
 // Ranking route
-app.get('/ranking', async (req, res) => {
+app.get('/ranking/:type', async (req, res) => {
     try {
-        await rankingManager.loadRankings();
-        const rankings = rankingManager.getTopRankings();
-        
+        const rankingType = req.params.type;
+        let rankings;
+
+        if (rankingType === 'manual') {
+            await rankingManagerManual.loadRankings();
+            rankings = rankingManagerManual.getTopRankings();
+        } else if (rankingType === 'sam') {
+            await rankingManagerSAM.loadRankings();
+            rankings = rankingManagerSAM.getTopRankings();
+        } else {
+            throw new Error('Invalid ranking type');
+        }
+
         res.render('rank', {
             apiUrl: FLASK_API_URL,
             styleSheet: '/css/styles.css',
-            rankings: rankings
+            rankings: rankings, 
+            type : rankingType
         });
     } catch (error) {
         console.error('Error rendering ranking page:', error);
@@ -57,6 +72,22 @@ app.get('/ranking', async (req, res) => {
         });
     }
 });
+
+app.get('/adm', async (req, res) => {
+    try {
+        
+        res.render('adm', {
+            apiServerAddress: FLASK_API_URL,
+            styleSheet: '/css/styles.css',
+        });
+    } catch (error) {
+        console.error('Error rendering ranking page:', error);
+        res.status(500).render('error', {
+            message: 'Unable to load rankings at this time'
+        });
+    }
+}
+);
 // // API endpoint to submit new scores
 // app.post('/api/submit-score', async (req, res) => {
 //     try {

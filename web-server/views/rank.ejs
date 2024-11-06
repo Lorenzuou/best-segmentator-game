@@ -12,7 +12,15 @@
         <div class="screen">
             <div class="screen-content">
                 <h1 class="arcade-title">JOGO DE SEGMENTAÇÃO DE PELE</h1>
-                <h2 class="arcade-subtitle">★ RANKING DOS CAMPEÕES ★</h2>
+                <h2 class="arcade-subtitle">
+                    <% if (type === 'sam') { %>
+                        ★ RANKING DOS CAMPEÕES - SAM ★
+                    <% } else if (type === 'manual') { %>
+                        ★ RANKING DOS CAMPEÕES - MANUAL ★
+                    <% } else { %>
+                        ★ RANKING DOS CAMPEÕES ★
+                    <% } %>
+                </h2>
                 
                 <div class="rank-table">
                     <div class="rank-header">
@@ -46,15 +54,27 @@
                     <% } %>
                 </div>
 
-                <div class="legend">
+                <!-- <div class="legend">
                     <p>⭐ CRITÉRIOS DE CLASSIFICAÇÃO ⭐</p>
                     <ol>
-                        <li>Maior precisão de segmentação</li>
-                        <li>Menor tempo de conclusão</li>
-                        <li>Maior coeficiente Dice</li>
-                        <li>Maior índice Jaccard</li>
+                        <% if (type === 'sam') { %>
+                            <li>Maior precisão de segmentação (SAM)</li>
+                            <li>Menor tempo de conclusão (SAM)</li>
+                            <li>Maior coeficiente Dice (SAM)</li>
+                            <li>Maior índice Jaccard (SAM)</li>
+                        <% } else if (type === 'manual') { %>
+                            <li>Maior precisão de segmentação (Manual)</li>
+                            <li>Menor tempo de conclusão (Manual)</li>
+                            <li>Maior coeficiente Dice (Manual)</li>
+                            <li>Maior índice Jaccard (Manual)</li>
+                        <% } else { %>
+                            <li>Maior precisão de segmentação</li>
+                            <li>Menor tempo de conclusão</li>
+                            <li>Maior coeficiente Dice</li>
+                            <li>Maior índice Jaccard</li>
+                        <% } %>
                     </ol>
-                </div>
+                </div> -->
 
                 <a href="/" class="arcade-button">◄ Voltar ao Jogo ►</a>
             </div>

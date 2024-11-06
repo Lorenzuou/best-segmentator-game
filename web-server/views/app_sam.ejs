@@ -7,22 +7,16 @@
 </head>
 <body>
     <div display="flex" justify-content="center" align-items="center">
-        <h1>Automatic Image Segmentation Tool</h1>
-        <h2>Select one images folder and then start</h2>
+        <h1>Ferramenta de Segmentação Automática de Imagens</h1>
         <div style="display: flex;">
             <div>
-                <input type="button" id="imageLoader" name="imageLoader" multiple style="display: none;"/>
-                <input type="text" id="folderName" name="folderName" list="folderList"  placeholder="Enter the folder name" style="margin: 10px; padding: 10px;"/> 
-                <label for="imageLoader" class="custom-file-upload">
-                    Start
-                </label>
-                <datalist id="folderList"></datalist>  
+                <button for="start" class="button" id="imageLoader">Iniciar</button>
 
                     <!-- CANVAS -->
                     <div class="row">
                     <div class="col">                            
                         <div style="margin: 15px 0;">
-                            <h4>Original Image</h4>
+                            <h4>Imagem Original</h4>
                         </div>
                         <!-- SEGMENTATION CANVAS -->
                         <canvas id="img_seg" class="canvas_seg"></canvas>
@@ -30,9 +24,9 @@
 
                     <div class="col">
                         <div style="margin: 15px 0;">
-                            <h4>Mask</h4>
+                            <h4>Máscara</h4>
                         </div>
-                        <!-- CANVAS WITH RESULTING MASK -->
+                        <!-- CANVAS COM A MÁSCARA RESULTANTE -->
                         <canvas id="img_res"></canvas>
                      
 
@@ -40,16 +34,14 @@
                     </div>
              
 
-                    <div class="col">
-                        <button class="col button button-save" id="downloadImages">Download Images</button> 
+                    <!-- <div class="col"> 
+                        <button class="col button button-save" id="downloadImages">Baixar Imagens</button> 
                         <div id="backButtonContainer" style="display: none;">
-                            <button class=" button" id="backButton">Back to the Homepage</button>
+                            <button class=" button" id="backButton">Voltar para a Página Inicial</button>
                         </div>
-                    </div>
+                    </div>-->
 
                 </div>
-               
-                
             </div>
            
            
@@ -57,7 +49,7 @@
         </div>
 
         <div style="margin: 20px 0;">
-            <label for="imageProgress">Progress:</label>
+            <label for="imageProgress">Progresso:</label>
             <progress id="imageProgress" value="0" max="100"></progress>
             <span id="progressInfo">0/n</span> <!-- Add this line -->
             <button class="button" id="resetButton" style="display: none; margin: 0;">Reset ↺</button>
@@ -65,13 +57,8 @@
         </div>
         
         <div id="selection_buttons" class="row" >
-            <div class="col">
-                <button style="display: none;" class="button button-selection button-selection-pressed" id="modeBox" >Box</button>
-                <button style="display: none;" class="button button-selection" id="modeClick">Click</button>
-            </div>
-
-            <div class="col">
-                <button style="display: none;" class="button" id="generateButton">Generate Mask</button>
+          
+            <div class="col"> 
                 <button class="button" id="pushButton">Next ►</button>
                 </div>
             </div>  
@@ -154,9 +141,12 @@
       
         <script>
 
+        var folderName = '<%= groupFolder %>'
+
+
         var mode = 'box'
 
-        const size_of_images = 50;
+        var size_of_images = 10;
            
 
         var canvas = document.getElementById('img_seg');
@@ -180,7 +170,6 @@
 
         var time_spend = 0
 
-        var folderName = '';
 
         var box = [];
         var inputLabels = [];
@@ -342,109 +331,16 @@
             ctx.stroke();
         }
 
-        document.getElementById('downloadImages').addEventListener('click',zipAndDownload);
+        // document.getElementById('downloadImages').addEventListener('click',zipAndDownload);
 
         //add box listeners
         document.getElementById('img_seg').addEventListener('mousedown', box_mode_down);
         document.getElementById('img_seg').addEventListener('mousemove', box_mode_move);
         document.getElementById('img_seg').addEventListener('mouseup', box_mouse_up);
 
-        document.getElementById('modeBox').addEventListener('click', function() {
-            mode = 'box';
-            document.getElementById('img_seg').classList.remove('img_seg_click');
-            document.getElementById('img_seg').classList.add('img_seg_box');
-
-            document.getElementById('modeClick').classList.remove('button-selection-pressed');
-            document.getElementById('modeBox').classList.add('button-selection-pressed');
-
-            //redraw canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            //hide reset button
-            document.getElementById('resetButton').style.display = 'none';
-
-
-
-            // add listeners to the canvas
-            canvas.addEventListener('mousedown', box_mode_down);
-            canvas.addEventListener('mousemove', box_mode_move);
-            canvas.addEventListener('mouseup', box_mouse_up);
-
-            //remove, if exists, click listeners
-            canvas.removeEventListener('click', click_mode);
-
-
-        });
-
-        document.getElementById('modeClick').addEventListener('click', function() {
-            mode = 'click';
-            document.getElementById('img_seg').classList.remove('img_seg_box');
-            document.getElementById('img_seg').classList.add('img_seg_click');
-
-            document.getElementById('modeBox').classList.remove('button-selection-pressed');
-            document.getElementById('modeClick').classList.add('button-selection-pressed');
-
-            // add listeners to the canvas
-            document.getElementById('img_seg').addEventListener('click', click_mode);
-
-            //redraw canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            //display reset button
-            document.getElementById('resetButton').style.display = 'inline'
-            
-
-            //remove, if exists, box listeners
-            canvas.removeEventListener('mousedown', box_mode_down);
-            canvas.removeEventListener('mousemove', box_mode_move);
-            canvas.removeEventListener('mouseup', box_mouse_up);
-
-
-        });
+  
 
         
-        document.getElementById('generateButton').addEventListener('click', function() {
-        // Show the loading animation
-            document.getElementById('loading').style.display = 'block';
-
-           
-        
-            var dataUrl = images[currentImageIndex];
-
-            var base64Image = dataUrl.split(',')[1];
-
-            if (mode === 'click') {
-                    var jsonData = {
-                        file: base64Image,
-                        fileName: fileNames[currentImageIndex],
-                        folderName: folderName,
-                        again: sendingAgain,
-                        input_labels: inputLabels,
-                        input_points: inputPoints,
-                        sessionIdentifier: sessionIdentifier
-                        
-                    };
-
-                }else{
-                // Create a JSON object with the base64 image, input labels, and input points
-                var jsonData = {
-                        file: base64Image,
-                        fileName: fileNames[currentImageIndex],
-                        folderName: folderName,
-                        box: box,
-                        again: sendingAgain,
-                        sessionIdentifier: sessionIdentifier
-
-                    };
-
-                }
-
-
-            do_the_fetch_box(jsonData);
-        });
-       
           
         function updateProgress(progress) {
             // Update the progress bar, value will be progress/images.lenght on int 
@@ -458,6 +354,7 @@
             images_ready = [];
             currentImageIndex = 0;
 
+
             // if fileNames is not empty, it means that the user has already loaded the images
             if (fileNames.length > 0) {
                 alert('You have already loaded the images, restart if something went wrong');
@@ -465,9 +362,8 @@
             }
             
             
-            folderName = document.getElementById('folderName').value;
 
-
+            console.log('handleImage');
             if (folderName === '') {
                 alert('Please enter a folder name');
                 return;
@@ -493,7 +389,8 @@
 
                 // The image names are returned in the 'images' property
                 fileNames = data.images;
-                console.log(fileNames);
+                size_of_images = fileNames.length;
+
 
                 //if 400, alert that the name of the folder is incorrect or do not exist
                 if (response.status === 400) {
@@ -502,6 +399,8 @@
                 }
 
                 updateProgress(0);
+                timer = new Date().getTime();
+
 
                 //start timer, it is the now datetime 
 
@@ -520,7 +419,6 @@
                         loadImage();
                     }
                 }
-                timer = new Date().getTime();
 
 
             } catch (error) {
@@ -528,7 +426,7 @@
             }
         }
 
-            function loadImage() {
+        function loadImage() {
                 img.onload = function() {
                     var maxWidth = 500; // Max width for the image
                     var ratio = 0;  // Used for aspect ratio
@@ -555,7 +453,7 @@
                 }
                 img.src = images[currentImageIndex];
             }
-
+        console.log('handleImage');
         document.getElementById('imageLoader').addEventListener('click', handleImage, false);
 
 
@@ -601,7 +499,6 @@
                 let end_time = new Date().getTime();
                 let time = end_time - timer;
                 // turn into seconds
-                time_spend = time / 1000; 
                 //send time to the server 
                 fetch('<%= apiUrl %>/data/savetimer', {
                     method: 'POST',
@@ -610,20 +507,35 @@
                     },
                     body: JSON.stringify({time: time, sessionIdentifier: sessionIdentifier})  // send the JSON data
                 })
+
+             
        
 
                 updateProgress(currentImageIndex);
                 let urlParams_ = new URLSearchParams(window.location.search);
                 let name_of_person_ = urlParams_.get('name_of_person') 
-                const backButtonContainer = document.getElementById('backButtonContainer');
-                const backButton = document.getElementById('backButton');
-                backButtonContainer.style.display = 'block';
-                backButton.onclick = function() {
-                    window.location.href = '/index?name_of_person=' + name_of_person_;
-                };
+                // const backButtonContainer = document.getElementById('backButtonContainer');
+                // const backButton = document.getElementById('backButton');
+                // backButtonContainer.style.display = 'block';
+
+                // backButton.onclick = function() {
+                //     window.location.href = '/index?name_of_person=' + name_of_person_;
+                // };
+
+                fetch('<%= apiUrl %>/data/saverun', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({sessionIdentifier: sessionIdentifier, user_name: name_of_person_, time: time})  // send the JSON data
+                })
 
                 //alert segmentation is over 
-                alert('Segmentation is over: click in "Download Images" to download the images and time spent');
+                alert('Segmentation is over!');
+                //sleep 2 seconds to redirect to the ranking page
+                setTimeout(function() {
+                    window.location.href = '/ranking/sam';
+                }, 1200);
 
             }
         });
@@ -664,36 +576,7 @@
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-                const inputField = document.getElementById('folderName');
-                
-                inputField.addEventListener('click', async function() {
-                    // Check if the list is already populated to avoid refetching
-                    if(document.getElementById('folderList').options.length === 0) {
-                        try {
-                            const response = await fetch('<%= apiUrl %>/data/list');
-                            const data = await response.json();
-                            const folderList = document.getElementById('folderList');
-
-                            const folders = data.folders;
-
-                            folders.forEach(function(folder) {
-                                console.log(folder);
-                                const option = document.createElement('option');
-
-                                option.value = folder;
-
-                                folderList.appendChild(option);
-                            });
-
-                        } catch (error) {
-                            console.error('Error:', error);
-                            alert('Error: ' + error);
-                        }
-                    }
-                });
-           });
-
+    
 
        
 

@@ -1,2 +1,4 @@
 sessions
 images
+*.json
+*.txt

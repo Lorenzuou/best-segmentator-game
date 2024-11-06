@@ -6,22 +6,19 @@
 </head>
 <body>
     <div display="flex" justify-content="center" align-items="center">
-        <h1>Image Segmentation Tool</h1>
-        <h2>Select one images folder and then start</h2>
+        <h1>Ferramenta de Segmentação de Imagens</h1>
+        <h2>Selecione uma pasta de imagens e depois comece</h2>
        
         <div style="display: flex;">
             <div>
-                <input type="button" id="imageLoader" name="imageLoader" multiple style="display: none;"/>
-                <input type="text" id="folderName" name="folderName" list="folderList"  placeholder="Enter the folder name" style="margin: 10px; padding: 10px;"/> 
-                <label for="imageLoader" class="custom-file-upload">
-                    Start
-                </label>
+                <button for="start" class="button" id="imageLoader">Começar</button>
+               
                 <datalist id="folderList"></datalist> 
                 <!-- CANVAS -->
                  <div class="row">
                     <div class="col">                            
                         <div style="margin: 15px 0;">
-                            <h4>Original Image</h4>
+                            <h4>Imagem Original</h4>
                         </div>
                         <!-- SEGMENTATION CANVAS -->
                         <canvas id="img_seg" class="canvas_seg"></canvas>
@@ -29,39 +26,38 @@
 
                     <div class="col">
                         <div style="margin: 15px 0;">
-                            <h4>Mask</h4>
+                            <h4>Máscara</h4>
                         </div>
-                        <!-- CANVAS WITH RESULTING MASK -->
+                        <!-- CANVAS COM A MÁSCARA RESULTANTE -->
                         <canvas id="img_res"></canvas>
                     </div>
-                    <div class="col">
-                        <button class="col button button-save" id="downloadImages">Download Images</button> 
+                    <!-- <div class="col"> 
+                        <button class="col button button-save" id="downloadImages">Baixar Imagens</button> 
                         <div id="backButtonContainer" style="display: none;">
-                            <button class=" button" id="backButton">Back to the Homepage</button>
+                            <button class=" button" id="backButton">Voltar para a Página Inicial</button>
                         </div>
-                    </div>
+                    </div>-->
 
                 </div>
-            <h3>To segment, click and drag the mouse over the image</h3>
+            <h3>Para segmentar, clique e arraste o mouse sobre a imagem</h3>
 
             <div style="margin: 20px 0;">
-                <label for="imageProgress">Progress:</label>
+                <label for="imageProgress">Progresso:</label>
                 <progress id="imageProgress" value="0" max="100"></progress>
-                <span id="progressInfo">0/n</span> <!-- Add this line -->
+                <span id="progressInfo">0/n</span> <!-- Adicione esta linha -->
     
             </div>
             
             <div class="row">
                 <div class="col"></div>
-                <button class=" button" id="resetButton">Reset ↺</button>
-                <button class=" button" id="pushButton">Next ►</button>
-                <!-- <button class=" button button-save" id="downloadImages">Download Images</button>  -->
+                <button class=" button" id="resetButton">Resetar ↺</button>
+                <button class=" button" id="pushButton">Próximo ►</button>
+                <!-- <button class=" button button-save" id="downloadImages">Baixar Imagens</button>  -->
                 </div>
             </div>  
            
             
         </div>
-       
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>
@@ -70,12 +66,14 @@
         var fileNames = [];
         var images = [];
         var currentImageIndex = 0;
+        var folderName = '<%= groupFolder %>'
+
 
         var sessionIdentifier = Math.random().toString(36).substring(7);
         //add box-sam- to the session identifier
         sessionIdentifier = 'manual-' + sessionIdentifier;
 
-        const size_of_images = 4;
+        var size_of_images = 4;
         
        
         function zipAndDownload(){
@@ -146,7 +144,6 @@
     <script>
 
         var images_ready = [];
-
 
         function desenharNoCanvas(posAnterior,  posAtual, contexto, cor = 'black') {
                 if (!contexto) { return; }
@@ -244,7 +241,6 @@
             images_ready = [];
             currentImageIndex = 0;
             
-            folderName = document.getElementById('folderName').value;
 
              if (fileNames.length > 0) {
                 alert('You have already loaded the images, restart if something went wrong');
@@ -279,6 +275,7 @@
 
                 // The image names are returned in the 'images' property
                 fileNames = data.images;
+                size_of_images = fileNames.length;
 
                 //if 400, alert that the name of the folder is incorrect or do not exist
                 if (response.status === 400) {
@@ -308,7 +305,6 @@
                     }
                 }
 
-                
             } catch (error) {
                 console.error(error);
             }
@@ -478,8 +474,6 @@
             
                 let end_time = new Date().getTime();
                 let time = end_time - timer;
-                // turn into seconds
-                time_spend = time / 1000; 
                 //send time to the server 
                 fetch('<%= apiUrl %>/data/savetimer', {
                     method: 'POST',
@@ -491,12 +485,12 @@
                 let urlParams_ = new URLSearchParams(window.location.search);
                 let name_of_person_ = urlParams_.get('name_of_person')
 
-                const backButtonContainer = document.getElementById('backButtonContainer');
-                const backButton = document.getElementById('backButton');
-                backButtonContainer.style.display = 'block';
-                backButton.onclick = function() {
-                    window.location.href = '/index?name_of_person=' + name_of_person_;
-                };
+                // const backButtonContainer = document.getElementById('backButtonContainer');
+                // const backButton = document.getElementById('backButton');
+                // backButtonContainer.style.display = 'block';
+                // backButton.onclick = function() {
+                //     window.location.href = '/index?name_of_person=' + name_of_person_;
+                // };
                       //send a request to data/saverun with sessionIdentifier, folderName and time
                 fetch('<%= apiUrl %>/data/saverun', {
                     method: 'POST',
@@ -507,7 +501,16 @@
                 })
 
                 //alert segmentation is over 
-                alert('Segmentation is over: click in "Download Images" to download the images and time spent');
+                // alert('Segmentation is over: click in "Download Images" to download the images and time spent');
+
+                
+
+                //go to ranking page
+                //sleep 2 seconds to redirect to the ranking page
+                setTimeout(function() {
+                    window.location.href = '/ranking/manual';
+                }, 1200);
+
 
           
             }

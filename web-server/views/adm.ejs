@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Reset Ranking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<%= styleSheet %>">
+    <script>
+        function confirmReset(event, type) {
+            event.preventDefault();
+            if (confirm(`Are you sure you want to reset the ${type} ranking?`)) {
+                fetch(event.target.action, {
+                    method: 'POST'
+                }).then(response => {
+                    if (response.ok) {
+                        alert(`${type} ranking was reset successfully.`);
+                    } else {
+                        alert(`Failed to reset ${type} ranking.`);
+                    }
+                }).catch(error => {
+                    alert(`Error: ${error}`);
+                });
+            }
+        }
+    </script>
+</head>
+<body class="adm-body">
+    <div class="arcade-cabinet">
+        <div class="screen">
+            <div class="screen-content">
+                <h1 class="arcade-title">ADMIN - RESET RANKING</h1>
+                <form action="<%= apiServerAddress %>/data/ranking/reset?type=sam" method="POST" onsubmit="confirmReset(event, 'SAM')">
+                    <button class="arcade-button">RESET SAM RANKING</button>
+                </form>
+                <form action="<%= apiServerAddress %>/data/ranking/reset?type=manual" method="POST" onsubmit="confirmReset(event, 'Manual')">
+                    <button class="arcade-button">RESET MANUAL RANKING</button>
+                </form>
+                <a href="/" class="arcade-button">◄ Voltar ao Jogo ►</a>
+            </div>
+
+           
+        </div>
+       
+    </div>
+</body>
+</html>

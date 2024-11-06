@@ -3,7 +3,7 @@
         "dice": 0.7123018232452568,
         "iou": 0.5547429674456094,
         "name": "Lorenzo",
-        "position": 2,
+        "position": 3,
         "time": 6830.0
     },
     "antionio": {
@@ -12,5 +12,19 @@
         "name": "antionio",
         "position": 1,
         "time": 3856.0
+    },
+    "ffgd": {
+        "dice": 0.11790136081176747,
+        "iou": 0.08358874835485958,
+        "name": "ffgd",
+        "position": 2,
+        "time": 5498.0
+    },
+    "s": {
+        "dice": 0.49925943301749715,
+        "iou": 0.36680039419548605,
+        "name": "s",
+        "position": 4,
+        "time": 6988.0
     }
 }
