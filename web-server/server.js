@@ -136,7 +136,8 @@ app.listen(port, async () => {
     }
     
     // Initial load of rankings
-    await rankingManager.loadRankings();
+    await rankingManagerManual.loadRankings();
+    await rankingManagerSAM.loadRankings();
     
     console.log(`Server is listening on port ${port}`);
 });
