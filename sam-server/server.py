@@ -54,13 +54,13 @@ app = Flask(__name__)
 CORS(app)  # enable CORS on the app
 
 
-# CHECKPOINT_PATH = "./sam_vit_h_4b8939.pth"
-CHECKPOINT_PATH = "./sam_vit_b_01ec64.pth"
+CHECKPOINT_PATH = "./sam_vit_h_4b8939.pth"
+# CHECKPOINT_PATH = "./sam_vit_b_01ec64.pth"
 
 DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(f"Device: {DEVICE}")
-# MODEL_TYPE = "vit_h"
-MODEL_TYPE = "vit_b"
+MODEL_TYPE = "vit_h"
+# MODEL_TYPE = "vit_b"
 
 model = sam_model_registry[MODEL_TYPE](checkpoint=CHECKPOINT_PATH)
 model.to(device=DEVICE)
