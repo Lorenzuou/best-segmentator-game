@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* 
 
 RUN apt-get update && apt-get install curl -y
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
 WORKDIR /app
 
